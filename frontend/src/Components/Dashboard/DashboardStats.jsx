@@ -1,9 +1,44 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import Axios from '../../Api/Axios';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import { UserContext } from '../../Context/UserContext';
 import { Table, Input, Select, Button, ConfigProvider, theme } from 'antd';
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
+import { FiChevronDown, FiRefreshCw } from 'react-icons/fi';
+
+// ── Dark custom select — replaces native <select> to avoid OS white popup ─────
+const DarkSelect = ({ value, onChange, options, disabled, placeholder, minWidth }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const selected = options.find(o => o.value === value);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative" style={{ minWidth: minWidth || 140 }}>
+      <button type="button" onClick={() => !disabled && setOpen(o => !o)} disabled={disabled}
+        className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white/70 hover:border-amber-500/50 focus:outline-none focus:border-amber-500 disabled:opacity-40 transition-colors">
+        <span className="truncate">{selected?.label || placeholder || 'Select...'}</span>
+        <FiChevronDown size={13} className={`flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-[#1a1a1a] border border-white/10 rounded-md shadow-xl z-50 overflow-hidden">
+          {options.map(o => (
+            <button key={o.value} type="button"
+              onClick={() => { onChange(o.value); setOpen(false); }}
+              className={`w-full text-left px-3 py-2 text-sm transition-colors ${value === o.value ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}>
+              {o.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // ── Mock data shown when no event is selected or data is empty ────────────────
 const MOCK_STATUS = [
@@ -87,6 +122,16 @@ const DashboardStats = () => {
       fetchFilterOptions();
     }
   }, [timeRange, selectedEvent, filters, pagination.current]);
+
+  // Auto-refresh every 30s when an event is selected
+  useEffect(() => {
+    if (!selectedEvent) return;
+    const interval = setInterval(() => {
+      fetchDashboardData();
+      fetchUsersData();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [selectedEvent, timeRange, filters]);
 
   const fetchEventOptions = async () => {
     try {
@@ -302,7 +347,7 @@ const DashboardStats = () => {
   }
 
   const { statistics } = dashboardData || {};
-  const isMock = !selectedEvent || !statistics?.totalUsers;
+  const isMock = !selectedEvent;
 
   const displayStats = isMock ? MOCK_STATS : {
     totalUsers: statistics?.totalUsers || 0,
@@ -327,20 +372,24 @@ const DashboardStats = () => {
           <h1 className="text-xl font-bold text-white">Dashboard</h1>
           {isMock && <p className="text-xs text-amber-500 mt-0.5">Showing sample data — select an event to see real stats</p>}
         </div>
-        <div className="flex gap-3 items-center">
-          <select value={timeRange} onChange={e => setTimeRange(e.target.value)}
-            style={{ colorScheme: 'dark' }}
-            className="px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white/70 focus:outline-none focus:border-amber-500">
-            <option value="all">All Time</option>
-            <option value="week">Last Week</option>
-            <option value="month">Last Month</option>
-          </select>
-          <select value={selectedEvent} onChange={handleEventChange} disabled={eventsLoading}
-            style={{ colorScheme: 'dark' }}
-            className="px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white/70 focus:outline-none focus:border-amber-500 min-w-[180px] disabled:opacity-50">
-            <option value="">All Events</option>
-            {eventOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
+        <div className="flex gap-3 items-center flex-wrap">
+          <DarkSelect
+            value={timeRange}
+            onChange={setTimeRange}
+            options={[{ value: 'all', label: 'All Time' }, { value: 'week', label: 'Last Week' }, { value: 'month', label: 'Last Month' }]}
+          />
+          <DarkSelect
+            value={selectedEvent}
+            onChange={(v) => { setSelectedEvent(v); setPagination(p => ({ ...p, current: 1 })); setFilters({ company: '', slot: '', status: '', sortBy: 'desc' }); }}
+            options={[{ value: '', label: 'All Events' }, ...eventOptions]}
+            disabled={eventsLoading}
+            placeholder="All Events"
+            minWidth={200}
+          />
+          <button onClick={() => { fetchDashboardData(); if (selectedEvent) { fetchUsersData(); fetchFilterOptions(); } }}
+            className="flex items-center gap-1.5 px-3 py-2 bg-white/5 border border-white/10 rounded-md text-xs text-white/50 hover:text-white hover:border-white/20 transition-colors">
+            <FiRefreshCw size={12} /> Refresh
+          </button>
         </div>
       </div>
 
