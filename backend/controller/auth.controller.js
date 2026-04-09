@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 import { generateTokenAndCookie } from "../utils/generateToken.js";
 import { Events } from "../model/event.model.js";
 import mongoose from "mongoose";
-import { sendEmail, welcomeHtml } from "../lib/email.js";
 
 export const signup = async (req, res) => {
   const { username, email, password, role, eventId } = req.body;
@@ -83,11 +82,6 @@ export const signup = async (req, res) => {
 
     // Return response without sensitive data
     const { password: _, ...userWithoutPassword } = newUser._doc;
-
-    // Send welcome email (non-blocking — don't fail signup if email fails)
-    sendEmail(email, "Welcome to MeetApp", welcomeHtml(username)).catch(err =>
-      console.error("Welcome email failed:", err.message)
-    );
 
     res.status(201).json({
       success: true,
