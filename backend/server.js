@@ -28,10 +28,11 @@ const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       "https://meeting-app-beta-seven.vercel.app",
+      "https://netwit.vercel.app",
+      process.env.CLIENT_URL,
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://idc.loopnow.in"
-    ];
+    ].filter(Boolean);
     
     // Allow requests with no origin (like mobile apps, curl requests)
     if (!origin) return callback(null, true);
