@@ -29,6 +29,7 @@ const corsOptions = {
     const allowedOrigins = [
       "https://meeting-app-beta-seven.vercel.app",
       "https://netwit.vercel.app",
+      "https://netwitmeet.vercel.app",
       process.env.CLIENT_URL,
       "http://localhost:5173",
       "http://localhost:5174",
