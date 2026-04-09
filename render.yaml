@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: meetapp-backend
+    runtime: node
+    rootDir: .
+    buildCommand: npm install
+    startCommand: node backend/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8493
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_Token
+        sync: false
+      - key: X_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM
+        sync: false
+      - key: CLIENT_URL
+        sync: false
