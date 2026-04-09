@@ -60,7 +60,7 @@ const UserProvider = ({ children }) => {
             await logoutService();
             setUser(null);
             setIsAuthenticated(false);
-            navigate("/login");
+            navigate("/");
         } catch {
             toast('Failed to logout. Please try again.', 'error');
         } finally {
