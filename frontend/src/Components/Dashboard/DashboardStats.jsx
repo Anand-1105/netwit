@@ -299,9 +299,9 @@ const DashboardStats = () => {
   if (loading) {
     return (
       <div className="p-6 space-y-4">
-        <div className="h-8 w-48 bg-slate-100 rounded animate-pulse" />
+        <div className="h-8 w-48 bg-white/5 rounded animate-pulse" />
         <div className="grid grid-cols-3 gap-4">
-          {[...Array(3)].map((_, i) => <div key={i} className="h-24 bg-slate-100 rounded-lg animate-pulse" />)}
+          {[...Array(3)].map((_, i) => <div key={i} className="h-24 bg-white/5 rounded-lg animate-pulse" />)}
         </div>
       </div>
     );
@@ -326,28 +326,49 @@ const DashboardStats = () => {
 
   return (
     <div className="p-4 sm:p-6">
+      {/* Ant Design dark override */}
+      <style>{`
+        .ant-table { background: transparent !important; color: rgba(255,255,255,0.7) !important; }
+        .ant-table-thead > tr > th { background: rgba(255,255,255,0.05) !important; color: rgba(255,255,255,0.4) !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; font-size: 11px; }
+        .ant-table-tbody > tr > td { border-bottom: 1px solid rgba(255,255,255,0.05) !important; color: rgba(255,255,255,0.7) !important; }
+        .ant-table-tbody > tr:hover > td { background: rgba(255,255,255,0.04) !important; }
+        .ant-table-tbody > tr.ant-table-row:hover > td { background: rgba(255,255,255,0.04) !important; }
+        .ant-pagination-item { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; }
+        .ant-pagination-item a { color: rgba(255,255,255,0.5) !important; }
+        .ant-pagination-item-active { background: rgba(245,158,11,0.2) !important; border-color: #f59e0b !important; }
+        .ant-pagination-item-active a { color: #f59e0b !important; }
+        .ant-pagination-prev button, .ant-pagination-next button { color: rgba(255,255,255,0.4) !important; background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; }
+        .ant-input { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; color: rgba(255,255,255,0.7) !important; }
+        .ant-input::placeholder { color: rgba(255,255,255,0.2) !important; }
+        .ant-input-prefix { color: rgba(255,255,255,0.3) !important; }
+        .ant-select-selector { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; color: rgba(255,255,255,0.7) !important; }
+        .ant-select-selection-placeholder { color: rgba(255,255,255,0.2) !important; }
+        .ant-select-dropdown { background: #1a1a1a !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+        .ant-select-item { color: rgba(255,255,255,0.6) !important; }
+        .ant-select-item-option-active { background: rgba(255,255,255,0.05) !important; }
+        .ant-select-item-option-selected { background: rgba(245,158,11,0.15) !important; color: #f59e0b !important; }
+        .ant-btn { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; color: rgba(255,255,255,0.5) !important; }
+        .ant-btn:hover { border-color: rgba(255,255,255,0.2) !important; color: rgba(255,255,255,0.8) !important; }
+        .ant-empty-description { color: rgba(255,255,255,0.3) !important; }
+        .ant-spin-dot-item { background: #f59e0b !important; }
+        .ant-table-wrapper .ant-spin-container { background: transparent !important; }
+      `}</style>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Dashboard</h1>
-          {isMock && <p className="text-xs text-amber-600 mt-0.5">Showing sample data — select an event to see real stats</p>}
+          <h1 className="text-xl font-bold text-white">Dashboard</h1>
+          {isMock && <p className="text-xs text-amber-500 mt-0.5">Showing sample data — select an event to see real stats</p>}
         </div>
         <div className="flex gap-3 items-center">
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
-          >
+          <select value={timeRange} onChange={e => setTimeRange(e.target.value)}
+            className="px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white/70 focus:outline-none focus:border-amber-500 [color-scheme:dark]">
             <option value="all">All Time</option>
             <option value="week">Last Week</option>
             <option value="month">Last Month</option>
           </select>
-          <select
-            value={selectedEvent}
-            onChange={handleEventChange}
-            disabled={eventsLoading}
-            className="px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white min-w-[180px] disabled:bg-slate-50"
-          >
+          <select value={selectedEvent} onChange={handleEventChange} disabled={eventsLoading}
+            className="px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white/70 focus:outline-none focus:border-amber-500 min-w-[180px] disabled:opacity-50 [color-scheme:dark]">
             <option value="">All Events</option>
             {eventOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
@@ -357,13 +378,13 @@ const DashboardStats = () => {
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Total Attendees', value: displayStats.totalUsers, color: 'bg-blue-50 text-blue-700' },
-          { label: 'Gifts Collected', value: displayStats.giftsCollected, color: 'bg-emerald-50 text-emerald-700' },
-          { label: 'Events', value: displayStats.totalEvents, color: 'bg-amber-50 text-amber-700' },
+          { label: 'Total Attendees', value: displayStats.totalUsers, color: 'text-blue-400' },
+          { label: 'Gifts Collected', value: displayStats.giftsCollected, color: 'text-emerald-400' },
+          { label: 'Events', value: displayStats.totalEvents, color: 'text-amber-400' },
         ].map(card => (
-          <div key={card.label} className="bg-white border border-slate-200 rounded-lg p-5">
-            <p className="text-xs font-medium text-slate-500 mb-1">{card.label}</p>
-            <p className={`text-3xl font-bold ${card.color.split(' ')[1]}`}>{card.value}</p>
+          <div key={card.label} className="bg-[#1a1a1a] border border-white/10 rounded-lg p-5">
+            <p className="text-xs text-white/40 mb-1">{card.label}</p>
+            <p className={`text-3xl font-bold ${card.color}`}>{card.value}</p>
           </div>
         ))}
       </div>
@@ -371,19 +392,13 @@ const DashboardStats = () => {
       {/* Charts + table row */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-6">
         {/* Users table */}
-        <div className="lg:col-span-3 bg-white border border-slate-200 rounded-lg p-4">
+        <div className="lg:col-span-3 bg-[#1a1a1a] border border-white/10 rounded-lg p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-slate-800">Attendee Slots</h3>
+            <h3 className="text-sm font-semibold text-white/80">Attendee Slots</h3>
             <Button icon={<ReloadOutlined />} onClick={fetchUsersData} loading={usersLoading} size="small">Refresh</Button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-            <Input
-              placeholder="Search..."
-              prefix={<SearchOutlined />}
-              value={filters.search || ''}
-              onChange={e => handleFilterChange('search', e.target.value)}
-              allowClear size="small"
-            />
+            <Input placeholder="Search..." prefix={<SearchOutlined />} value={filters.search || ''} onChange={e => handleFilterChange('search', e.target.value)} allowClear size="small" />
             <Select placeholder="Company" className="w-full" value={filters.company || undefined} onChange={v => handleFilterChange('company', v)} options={companyOptions} allowClear size="small" />
             <Select placeholder="Status" className="w-full" value={filters.status || undefined} onChange={v => handleFilterChange('status', v)} options={[{ value: 'scheduled', label: 'Scheduled' }, { value: 'completed', label: 'Completed' }]} allowClear size="small" />
             <Select placeholder="Time Slot" className="w-full" value={filters.slot || undefined} onChange={v => handleFilterChange('slot', v)} options={slotOptions} allowClear size="small" />
@@ -395,7 +410,7 @@ const DashboardStats = () => {
               { title: 'Slot', key: 'slot', render: (_, r) => r.slots?.timeSlot || '—' },
               { title: 'Status', key: 'status', render: (_, r) => {
                 const done = r.slots?.completed;
-                return <span className={`px-2 py-0.5 rounded text-xs font-medium ${done ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>{done ? 'Completed' : 'Pending'}</span>;
+                return <span className={`px-2 py-0.5 rounded text-xs font-medium ${done ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>{done ? 'Completed' : 'Pending'}</span>;
               }},
             ]}
             dataSource={isMock ? MOCK_TABLE : usersData}
@@ -409,44 +424,34 @@ const DashboardStats = () => {
           />
         </div>
 
-        {/* Pie chart */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-slate-800 mb-3">Status Breakdown</h3>
+        {/* Pie + bar charts */}
+        <div className="lg:col-span-2 bg-[#1a1a1a] border border-white/10 rounded-lg p-4">
+          <h3 className="text-sm font-semibold text-white/80 mb-3">Status Breakdown</h3>
           <ResponsiveContainer width="100%" height={180}>
             <PieChart>
-              <Pie
-                data={statusChartData}
-                cx="50%"
-                cy="50%"
-                outerRadius={65}
-                innerRadius={30}
-                dataKey="value"
-                paddingAngle={3}
-              >
+              <Pie data={statusChartData} cx="50%" cy="50%" outerRadius={65} innerRadius={30} dataKey="value" paddingAngle={3}>
                 {statusChartData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
               </Pie>
-              <Tooltip formatter={(value, name) => [value, name]} />
+              <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#e8e8e8' }} />
             </PieChart>
           </ResponsiveContainer>
           <div className="mt-2 space-y-1.5">
             {statusChartData.map((entry, i) => (
-              <div key={i} className="flex items-center justify-between text-xs text-slate-600">
+              <div key={i} className="flex items-center justify-between text-xs text-white/50">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: entry.fill }} />
                   <span>{entry.name}</span>
                 </div>
-                <span className="font-semibold tabular-nums">{entry.value}</span>
+                <span className="font-semibold tabular-nums text-white/70">{entry.value}</span>
               </div>
             ))}
           </div>
-
-          {/* Company bar chart */}
-          <h3 className="text-sm font-semibold text-slate-800 mt-5 mb-3">Slots by Company</h3>
+          <h3 className="text-sm font-semibold text-white/80 mt-5 mb-3">Slots by Company</h3>
           <ResponsiveContainer width="100%" height={160}>
             <BarChart data={isMock ? MOCK_COMPANIES : (companyOptions.length ? companyOptions.map(c => ({ company: c.label, slotCount: 0 })) : MOCK_COMPANIES)} layout="vertical" margin={{ left: 0, right: 10 }}>
-              <XAxis type="number" tick={{ fontSize: 10 }} />
-              <YAxis type="category" dataKey="company" tick={{ fontSize: 10 }} width={70} />
-              <Tooltip />
+              <XAxis type="number" tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.3)' }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="company" tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }} width={70} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#e8e8e8' }} />
               <Bar dataKey="slotCount" fill="#f59e0b" radius={[0, 3, 3, 0]} />
             </BarChart>
           </ResponsiveContainer>

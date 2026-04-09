@@ -78,8 +78,9 @@ console.log(data);
   };
 
   return (
-<div className="flex items-center gap-3 cursor-pointer bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200" onClick={handleDownload}> <FiDownload/> Report</div>
-    
+    <div className="flex items-center gap-2 cursor-pointer bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-md text-white/50 hover:text-white/80 text-sm transition-colors" onClick={handleDownload}>
+      <FiDownload size={13} /> Report
+    </div>
   );
 };
 
