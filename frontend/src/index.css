@@ -18,6 +18,12 @@ body {
   background-color: var(--bg);
   color: var(--text);
   font-family: system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+
+/* Native selects inherit dark color scheme */
+select, input, textarea {
+  color-scheme: dark;
 }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }

@@ -329,13 +329,15 @@ const DashboardStats = () => {
         </div>
         <div className="flex gap-3 items-center">
           <select value={timeRange} onChange={e => setTimeRange(e.target.value)}
-            className="px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white/70 focus:outline-none focus:border-amber-500 [color-scheme:dark]">
+            style={{ colorScheme: 'dark' }}
+            className="px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white/70 focus:outline-none focus:border-amber-500">
             <option value="all">All Time</option>
             <option value="week">Last Week</option>
             <option value="month">Last Month</option>
           </select>
           <select value={selectedEvent} onChange={handleEventChange} disabled={eventsLoading}
-            className="px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white/70 focus:outline-none focus:border-amber-500 min-w-[180px] disabled:opacity-50 [color-scheme:dark]">
+            style={{ colorScheme: 'dark' }}
+            className="px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white/70 focus:outline-none focus:border-amber-500 min-w-[180px] disabled:opacity-50">
             <option value="">All Events</option>
             {eventOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
