@@ -40,26 +40,34 @@ const DarkSelect = ({ value, onChange, options, disabled, placeholder, minWidth 
   );
 };
 
-// ── Mock data shown when no event is selected or data is empty ────────────────
+// ── Mock data for presentation ────────────────────────────────────────────────
 const MOCK_STATUS = [
-  { name: 'Completed', value: 42, fill: '#10b981' },
-  { name: 'Pending',   value: 31, fill: '#f59e0b' },
-  { name: 'Scheduled', value: 18, fill: '#3b82f6' },
+  { name: 'Completed', value: 187, fill: '#10b981' },
+  { name: 'Scheduled', value: 94,  fill: '#3b82f6' },
+  { name: 'Pending',   value: 63,  fill: '#f59e0b' },
+  { name: 'Removed',   value: 12,  fill: '#ef4444' },
 ];
 const MOCK_COMPANIES = [
-  { company: 'TechCorp', slotCount: 12 },
-  { company: 'Innovate Ltd', slotCount: 9 },
-  { company: 'GlobalSys', slotCount: 7 },
-  { company: 'DataPeak', slotCount: 5 },
-  { company: 'CloudBase', slotCount: 3 },
+  { company: 'AWS',          slotCount: 38 },
+  { company: 'Microsoft',    slotCount: 31 },
+  { company: 'Google Cloud', slotCount: 27 },
+  { company: 'Salesforce',   slotCount: 22 },
+  { company: 'SAP',          slotCount: 19 },
+  { company: 'Oracle',       slotCount: 15 },
+  { company: 'VMware',       slotCount: 11 },
 ];
-const MOCK_STATS = { totalUsers: 91, giftsCollected: 24, totalEvents: 3 };
+const MOCK_STATS = { totalUsers: 356, giftsCollected: 142, totalEvents: 4 };
 const MOCK_TABLE = [
-  { _id: 'm1', firstName: 'Priya', lastName: 'Sharma', email: 'priya@techcorp.com', slots: { company: 'TechCorp', timeSlot: '10:00', completed: true } },
-  { _id: 'm2', firstName: 'Rahul', lastName: 'Mehta', email: 'rahul@innovate.com', slots: { company: 'Innovate Ltd', timeSlot: '10:30', completed: false } },
-  { _id: 'm3', firstName: 'Anita', lastName: 'Verma', email: 'anita@globalsys.com', slots: { company: 'GlobalSys', timeSlot: '11:00', completed: true } },
-  { _id: 'm4', firstName: 'Suresh', lastName: 'Nair', email: 'suresh@datapeak.com', slots: { company: 'DataPeak', timeSlot: '11:30', completed: false } },
-  { _id: 'm5', firstName: 'Kavya', lastName: 'Iyer', email: 'kavya@cloudbase.com', slots: { company: 'CloudBase', timeSlot: '12:00', completed: false } },
+  { _id: 'm1',  firstName: 'Subrahmanya', lastName: 'Gupta',    email: 'sgupta@brigade.com',      slots: { company: 'AWS',          timeSlot: '10:00', completed: true  } },
+  { _id: 'm2',  firstName: 'Kapil',       lastName: 'Pal',      email: 'kpal@energizer.com',      slots: { company: 'Microsoft',    timeSlot: '10:20', completed: true  } },
+  { _id: 'm3',  firstName: 'Sheikh',      lastName: 'Osmany',   email: 'sosmany@ioc.com',         slots: { company: 'Google Cloud', timeSlot: '10:40', completed: false } },
+  { _id: 'm4',  firstName: 'Ramkumar',    lastName: 'Mohan',    email: 'rmohan@tata.com',         slots: { company: 'Salesforce',   timeSlot: '11:00', completed: true  } },
+  { _id: 'm5',  firstName: 'Priya',       lastName: 'Sharma',   email: 'psharma@infosys.com',     slots: { company: 'SAP',          timeSlot: '11:20', completed: false } },
+  { _id: 'm6',  firstName: 'Anand',       lastName: 'Krishnan', email: 'akrishnan@wipro.com',     slots: { company: 'Oracle',       timeSlot: '11:40', completed: true  } },
+  { _id: 'm7',  firstName: 'Deepa',       lastName: 'Nair',     email: 'dnair@hcl.com',           slots: { company: 'VMware',       timeSlot: '12:00', completed: false } },
+  { _id: 'm8',  firstName: 'Vikram',      lastName: 'Singh',    email: 'vsingh@techm.com',        slots: { company: 'AWS',          timeSlot: '12:20', completed: true  } },
+  { _id: 'm9',  firstName: 'Meera',       lastName: 'Iyer',     email: 'miyer@cognizant.com',     slots: { company: 'Microsoft',    timeSlot: '12:40', completed: false } },
+  { _id: 'm10', firstName: 'Rajesh',      lastName: 'Verma',    email: 'rverma@accenture.com',    slots: { company: 'Google Cloud', timeSlot: '13:00', completed: true  } },
 ];
 
 
@@ -394,11 +402,12 @@ const DashboardStats = () => {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Total Attendees', value: displayStats.totalUsers, color: 'text-blue-400' },
           { label: 'Gifts Collected', value: displayStats.giftsCollected, color: 'text-emerald-400' },
           { label: 'Events', value: displayStats.totalEvents, color: 'text-amber-400' },
+          { label: 'Completion Rate', value: isMock ? '52%' : (statistics?.statusDistribution?.completed && displayStats.totalUsers ? Math.round((statistics.statusDistribution.completed / displayStats.totalUsers) * 100) + '%' : '—'), color: 'text-purple-400' },
         ].map(card => (
           <div key={card.label} className="bg-[#1a1a1a] border border-white/10 rounded-lg p-5">
             <p className="text-xs text-white/40 mb-1">{card.label}</p>
