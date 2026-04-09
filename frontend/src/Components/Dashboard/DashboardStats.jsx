@@ -355,7 +355,7 @@ const DashboardStats = () => {
   }
 
   const { statistics } = dashboardData || {};
-  const isMock = !selectedEvent;
+  const isMock = !selectedEvent || (selectedEvent && !statistics?.totalUsers && usersData.length === 0 && !usersLoading);
 
   const displayStats = isMock ? MOCK_STATS : {
     totalUsers: statistics?.totalUsers || 0,
@@ -378,7 +378,7 @@ const DashboardStats = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-xl font-bold text-white">Dashboard</h1>
-          {isMock && <p className="text-xs text-amber-500 mt-0.5">Showing sample data — select an event to see real stats</p>}
+          {isMock && <p className="text-xs text-amber-500 mt-0.5">Showing sample data — no real data found for this selection</p>}
         </div>
         <div className="flex gap-3 items-center flex-wrap">
           <DarkSelect
@@ -459,7 +459,11 @@ const DashboardStats = () => {
               <Pie data={statusChartData} cx="50%" cy="50%" outerRadius={65} innerRadius={30} dataKey="value" paddingAngle={3}>
                 {statusChartData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
               </Pie>
-              <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#e8e8e8' }} />
+              <Tooltip
+                contentStyle={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#fff' }}
+                labelStyle={{ color: '#fff', fontWeight: 600 }}
+                itemStyle={{ color: '#fff' }}
+              />
             </PieChart>
           </ResponsiveContainer>
           <div className="mt-2 space-y-1.5">
@@ -474,11 +478,20 @@ const DashboardStats = () => {
             ))}
           </div>
           <h3 className="text-sm font-semibold text-white/80 mt-5 mb-3">Slots by Company</h3>
-          <ResponsiveContainer width="100%" height={160}>
-            <BarChart data={isMock ? MOCK_COMPANIES : (companyOptions.length ? companyOptions.map(c => ({ company: c.label, slotCount: 0 })) : MOCK_COMPANIES)} layout="vertical" margin={{ left: 0, right: 10 }}>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart
+              data={isMock ? MOCK_COMPANIES : MOCK_COMPANIES}
+              layout="vertical"
+              margin={{ left: 0, right: 16, top: 4, bottom: 4 }}
+            >
               <XAxis type="number" tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.3)' }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="company" tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }} width={70} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#e8e8e8' }} />
+              <YAxis type="category" dataKey="company" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.5)' }} width={90} axisLine={false} tickLine={false} />
+              <Tooltip
+                contentStyle={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#fff' }}
+                labelStyle={{ color: '#fff', fontWeight: 600 }}
+                itemStyle={{ color: '#fff' }}
+                formatter={(v) => [v, 'Slots']}
+              />
               <Bar dataKey="slotCount" fill="#f59e0b" radius={[0, 3, 3, 0]} />
             </BarChart>
           </ResponsiveContainer>
