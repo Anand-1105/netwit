@@ -1,0 +1,56 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: file-app-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+    networks:
+      - file-app-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: file-app-backend
+    ports:
+      - "8493:8493"
+    environment:
+      - PORT=8493
+      - MONGO_URI=${MONGO_URI:-mongodb://mongodb:27017/file-app}
+      - JWT_Token=${JWT_Token}
+      - X_API_KEY=${X_API_KEY}
+      - NODE_ENV=${NODE_ENV:-production}
+      - CLIENT_URL=${CLIENT_URL:-http://localhost:5174}
+    volumes:
+      - ./backend/public/uploads:/app/public/uploads
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    networks:
+      - file-app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://94.250.203.249:8493}
+    container_name: file-app-frontend
+    ports:
+      - "5174:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - file-app-network
+
+networks:
+  file-app-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+
