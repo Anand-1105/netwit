@@ -28,7 +28,6 @@ export const uploadFile = async (req, res) => {
 
     // Extract headers from the first row
     const headers = data[0].map(h => h ? h.toString().trim() : '');
-    console.log("Detected headers:", headers);
 
     // Remove header row
     data.shift();
@@ -73,7 +72,6 @@ export const uploadFile = async (req, res) => {
       rowData.selectedBy = brandColumns.map(brand => {
         const index = headers.indexOf(brand);
         let value = index >= 0 && row[index] ? row[index].toString().trim().toLowerCase() : '';
-        console.log(`Brand: ${brand}, Value: "${value}", Selected: ${selectionPattern.test(value)}`);
         return {
           name: brand,
           selected: selectionPattern.test(value)
@@ -145,9 +143,7 @@ export const uploadFile = async (req, res) => {
       }
     });
 
-    // Execute bulk write
     const result = await UserCollection.bulkWrite(bulkOps);
-    console.log("Bulk write result:", result);
 
     return res.status(200).json({
       message: "File processed successfully",

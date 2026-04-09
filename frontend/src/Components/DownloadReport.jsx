@@ -8,7 +8,6 @@ const DownloadReport = ({ id }) => {
     try {
       const res = await Axios.get(`/events/report/${id}`);
       const data = res.data;
-console.log(data);
 
       // Create a workbook and worksheet
       const workbook = new ExcelJS.Workbook();
@@ -73,7 +72,7 @@ console.log(data);
         window.URL.revokeObjectURL(url);
       }
     } catch (err) {
-      console.log(err);
+      // silent — download failed
     }
   };
 

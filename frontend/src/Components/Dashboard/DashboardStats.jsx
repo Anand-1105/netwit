@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Axios from '../../Api/Axios';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import { UserContext } from '../../Context/UserContext';
-import { Table, Input, Select, Button } from 'antd';
+import { Table, Input, Select, Button, ConfigProvider, theme } from 'antd';
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 
 // ── Mock data shown when no event is selected or data is empty ────────────────
@@ -179,10 +179,7 @@ const DashboardStats = () => {
   };
 
   const fetchUsersData = async () => {
-    if (!selectedEvent) {
-      console.log('No event selected, skipping fetch');
-      return;
-    }
+    if (!selectedEvent) return;
     
     try {
       console.log('Fetching users with filters:', { 
@@ -199,10 +196,7 @@ const DashboardStats = () => {
         limit: pagination.pageSize,
       });
       
-      console.log('API Response:', response.data);
-      
       if (response.data.success) {
-        console.log('Setting users data:', response.data.users);
         setUsersData(response.data.users || []);
         setPagination(prev => ({
           ...prev,
@@ -325,35 +319,8 @@ const DashboardStats = () => {
       }));
 
   return (
+    <ConfigProvider theme={{ algorithm: theme.darkAlgorithm, token: { colorBgContainer: '#1a1a1a', colorBgElevated: '#222', colorBorder: 'rgba(255,255,255,0.1)', colorText: 'rgba(255,255,255,0.7)', colorTextSecondary: 'rgba(255,255,255,0.4)', colorPrimary: '#f59e0b', colorBgBase: '#0f0f0f', borderRadius: 6 } }}>
     <div className="p-4 sm:p-6">
-      {/* Ant Design dark override */}
-      <style>{`
-        .ant-table { background: transparent !important; color: rgba(255,255,255,0.7) !important; }
-        .ant-table-thead > tr > th { background: rgba(255,255,255,0.05) !important; color: rgba(255,255,255,0.4) !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; font-size: 11px; }
-        .ant-table-tbody > tr > td { border-bottom: 1px solid rgba(255,255,255,0.05) !important; color: rgba(255,255,255,0.7) !important; }
-        .ant-table-tbody > tr:hover > td { background: rgba(255,255,255,0.04) !important; }
-        .ant-table-tbody > tr.ant-table-row:hover > td { background: rgba(255,255,255,0.04) !important; }
-        .ant-pagination-item { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; }
-        .ant-pagination-item a { color: rgba(255,255,255,0.5) !important; }
-        .ant-pagination-item-active { background: rgba(245,158,11,0.2) !important; border-color: #f59e0b !important; }
-        .ant-pagination-item-active a { color: #f59e0b !important; }
-        .ant-pagination-prev button, .ant-pagination-next button { color: rgba(255,255,255,0.4) !important; background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; }
-        .ant-input { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; color: rgba(255,255,255,0.7) !important; }
-        .ant-input::placeholder { color: rgba(255,255,255,0.2) !important; }
-        .ant-input-prefix { color: rgba(255,255,255,0.3) !important; }
-        .ant-select-selector { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; color: rgba(255,255,255,0.7) !important; }
-        .ant-select-selection-placeholder { color: rgba(255,255,255,0.2) !important; }
-        .ant-select-dropdown { background: #1a1a1a !important; border: 1px solid rgba(255,255,255,0.1) !important; }
-        .ant-select-item { color: rgba(255,255,255,0.6) !important; }
-        .ant-select-item-option-active { background: rgba(255,255,255,0.05) !important; }
-        .ant-select-item-option-selected { background: rgba(245,158,11,0.15) !important; color: #f59e0b !important; }
-        .ant-btn { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; color: rgba(255,255,255,0.5) !important; }
-        .ant-btn:hover { border-color: rgba(255,255,255,0.2) !important; color: rgba(255,255,255,0.8) !important; }
-        .ant-empty-description { color: rgba(255,255,255,0.3) !important; }
-        .ant-spin-dot-item { background: #f59e0b !important; }
-        .ant-table-wrapper .ant-spin-container { background: transparent !important; }
-      `}</style>
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
@@ -458,6 +425,7 @@ const DashboardStats = () => {
         </div>
       </div>
     </div>
+    </ConfigProvider>
   );
 };
 

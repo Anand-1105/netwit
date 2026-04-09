@@ -47,12 +47,8 @@ const UserCard = ({eventId, user: initialUser, searchQuery, selectedByOptions, t
 
     const handleEditChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setEditForm((prev) => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value,
-        }));
+        setEditForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
-console.log(slots);
 
     const handleEditSubmit = async (e) => {
         e.preventDefault();

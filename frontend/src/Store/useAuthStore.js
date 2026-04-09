@@ -6,7 +6,6 @@ export const signup = async (data) => {
     // console.log("response from signup", response);
     return response;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };

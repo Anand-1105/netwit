@@ -12,8 +12,7 @@ export const SlotsContextProvider = ({ children }) => {
     const fetchSlots = async (event) => {
         try {
             const response = await Axios.post('/slot/get-all-booked-slots',{event});
-            const data = response.data; // Use response.data for Axios
-            console.log(data);
+            const data = response.data;
             setSlots(data);
         } catch (error) {
             console.error('Error fetching slots:', error);
