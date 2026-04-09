@@ -3,263 +3,101 @@ import { useParams, useNavigate } from "react-router-dom";
 import Select from "react-select";
 import Axios from "../Api/Axios";
 
+const darkSelect = {
+  control: (p, s) => ({ ...p, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', boxShadow: 'none', borderColor: s.isFocused ? '#f59e0b' : 'rgba(255,255,255,0.1)' }),
+  menu: (p) => ({ ...p, background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)' }),
+  option: (p, s) => ({ ...p, background: s.isFocused ? 'rgba(255,255,255,0.05)' : 'transparent', color: '#e8e8e8', fontSize: '13px' }),
+  multiValue: (p) => ({ ...p, background: 'rgba(245,158,11,0.15)', borderRadius: '4px' }),
+  multiValueLabel: (p) => ({ ...p, color: '#f59e0b', fontSize: '12px' }),
+  multiValueRemove: (p) => ({ ...p, color: '#f59e0b' }),
+  input: (p) => ({ ...p, color: '#e8e8e8' }),
+  placeholder: (p) => ({ ...p, color: 'rgba(255,255,255,0.2)', fontSize: '13px' }),
+};
+
+const inp = 'w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-md text-sm text-white placeholder-white/20 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500';
+const lbl = 'block text-xs text-white/50 mb-1.5';
+
 const UpdateEvent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [updateLoading, setUpdateLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [users, setUsers] = useState([]);
-  
-  const [form, setForm] = useState({
-    title: "",
-    image: "",
-    description: "",
-    startDate: "",
-    endDate: "",
-    assignedTo: [],
-    slotGap: "",
-  });
+  const [form, setForm] = useState({ title: "", description: "", startDate: "", endDate: "", assignedTo: [], slotGap: "" });
 
-  const currentUserId = localStorage.getItem("userId");
-
- useEffect(() => {
-  const fetchData = async () => {
-    try {
-      // First fetch users list (if still needed for other purposes)
-      const usersResponse = await Axios.post("/auth/users-list");
-      const usersData = usersResponse.data.users || [];
-      setUsers(usersData);
-      
-      // Then fetch event details
-      const eventResponse = await Axios.get(`/events/${id}`);
-      const eventData = eventResponse.data;
-      setEvent(eventData);
-      
-      // Transform assignedTo array (which contains full user objects) to react-select format
-      const assignedToOptions = eventData.assignedTo?.map(user => ({
-        value: user._id,
-        label: `${user.username} (${user.email})`
-      })) || [];
-
-      setForm({
-        title: eventData.title || "",
-        image: eventData.image || "",
-        description: eventData.description || "",
-        startDate: eventData.startDate ? eventData.startDate.slice(0, 16) : "",
-        endDate: eventData.endDate ? eventData.endDate.slice(0, 16) : "",
-        assignedTo: assignedToOptions,
-        slotGap: eventData.slotGap || "",
-      });
-    } catch (err) {
-      setError("Failed to load data");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchData();
-}, [id]);
-
-  // Rest of your component remains the same...
-  const userOptions = users.map(user => ({
-    value: user._id,
-    label: `${user.username} (${user.email})`
-  }));
-
-  const slotGapOptions = [
-    { value: 15, label: '15 min' },
-    { value: 20, label: '20 min' },
-    { value: 30, label: '30 min' }
-  ];
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleAssignedToChange = (selectedOptions) => {
-    setForm({ ...form, assignedTo: selectedOptions || [] });
-  };
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [ur, er] = await Promise.all([Axios.post("/auth/users-list"), Axios.get("/events/" + id)]);
+        setUsers(ur.data.users || []);
+        const ev = er.data;
+        setForm({
+          title: ev.title || "",
+          description: ev.description || "",
+          startDate: ev.startDate ? new Date(ev.startDate).toISOString().slice(0, 16) : "",
+          endDate: ev.endDate ? new Date(ev.endDate).toISOString().slice(0, 16) : "",
+          assignedTo: ev.assignedTo?.map(u => ({ value: u._id, label: u.username + " (" + u.email + ")" })) || [],
+          slotGap: ev.slotGap || "",
+        });
+      } catch { setError("Failed to load data"); }
+      finally { setLoading(false); }
+    };
+    load();
+  }, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setUpdateLoading(true);
-
-    if (!form.title || form.assignedTo.length === 0) {
-      setError("Title and Assigned To are required.");
-      setUpdateLoading(false);
-      return;
-    }
-
-    if (form.startDate && form.endDate && new Date(form.endDate) <= new Date(form.startDate)) {
-      setError("End date must be after start date.");
-      setUpdateLoading(false);
-      return;
-    }
-
+    if (!form.title || form.assignedTo.length === 0) { setError("Title and Assigned To are required."); return; }
+    if (form.startDate && form.endDate && new Date(form.endDate) <= new Date(form.startDate)) { setError("End date must be after start date."); return; }
+    setSaving(true);
     try {
-      const assignedUserIds = form.assignedTo.map(option => option.value);
-      
-      const updateData = {
-        title: form.title,
-        image: form.image,
-        description: form.description,
-        startDate: form.startDate,
-        endDate: form.endDate,
-        assignedTo: assignedUserIds,
-        slotGap: parseInt(form.slotGap) || null,
-      };
-
-      await Axios.put(`/events/${id}`, updateData);
+      await Axios.put("/events/" + id, { ...form, assignedTo: form.assignedTo.map(o => o.value), slotGap: parseInt(form.slotGap) || null });
       navigate("/app");
-    } catch (err) {
-      setError(err?.response?.data?.error || "Update failed");
-    } finally {
-      setUpdateLoading(false);
-    }
+    } catch (err) { setError(err?.response?.data?.error || "Update failed"); }
+    finally { setSaving(false); }
   };
 
-  // Custom styles for react-select to match your design
-  const customStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      border: '1px solid #d1d5db',
-      borderRadius: '0.375rem',
-      padding: '0.125rem',
-      boxShadow: state.isFocused ? '0 0 0 1px #3b82f6' : 'none',
-      borderColor: state.isFocused ? '#3b82f6' : '#d1d5db',
-      '&:hover': {
-        borderColor: state.isFocused ? '#3b82f6' : '#d1d5db'
-      }
-    }),
-    multiValue: (provided) => ({
-      ...provided,
-      backgroundColor: '#eff6ff',
-      borderRadius: '0.25rem'
-    }),
-    multiValueLabel: (provided) => ({
-      ...provided,
-      color: '#1e40af'
-    }),
-    multiValueRemove: (provided) => ({
-      ...provided,
-      color: '#1e40af',
-      '&:hover': {
-        backgroundColor: '#dbeafe',
-        color: '#1e40af'
-      }
-    })
-  };
+  const userOptions = users.map(u => ({ value: u._id, label: u.username + " (" + u.email + ")" }));
+  const slotOpts = [{ value: 15, label: '15 min' }, { value: 20, label: '20 min' }, { value: 30, label: '30 min' }];
 
-  if (loading) return <div className="max-w-2xl mx-auto py-12 px-4 text-center">Loading...</div>;
-  if (!event) return <div className="max-w-2xl mx-auto py-12 px-4 text-center">Event not found</div>;
-console.log(event);
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-amber-500" />
+    </div>
+  );
 
   return (
-    <div className="max-w-2xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-      <h2 className="text-3xl font-bold mb-8">Update Event</h2>
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-xl shadow">
-        {error && <div className="text-red-500">{error}</div>}
-        
-        <div>
-          <label className="block font-medium mb-1">Title</label>
-          <input
-            type="text"
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
-            required
-          />
-        </div>
-
-        {/* <div>
-          <label className="block font-medium mb-1">Image URL</label>
-          <input
-            type="text"
-            name="image"
-            value={form.image}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
-          />
-        </div> */}
-
-        <div>
-          <label className="block font-medium mb-1">Description</label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
-          />
-        </div>
-
-        <div className="flex gap-4 flex-wrap">
+    <div className="max-w-2xl mx-auto py-10 px-4">
+      <h1 className="text-xl font-bold text-white mb-6">Update Event</h1>
+      <form onSubmit={handleSubmit} className="space-y-5 bg-[#1a1a1a] border border-white/10 rounded-xl p-6">
+        {error && <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">{error}</p>}
+        <div><label className={lbl}>Title</label><input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className={inp} required /></div>
+        <div><label className={lbl}>Description</label><textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} className={inp + ' resize-none'} /></div>
+        <div className="flex gap-4">
           <div className="flex-1">
-            <label className="block font-medium mb-1">Start Date</label>
-            <input
-              type="datetime-local"
-              name="startDate"
-              value={form.startDate}
-              onChange={e => { setForm(f => ({ ...f, startDate: e.target.value, endDate: f.endDate && new Date(f.endDate) <= new Date(e.target.value) ? "" : f.endDate })); }}
-              className="w-full border rounded px-3 py-2"
-            />
+            <label className={lbl}>Start Date</label>
+            <input type="datetime-local" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value, endDate: f.endDate && new Date(f.endDate) <= new Date(e.target.value) ? "" : f.endDate }))} className={inp + ' [color-scheme:dark]'} />
           </div>
           <div className="flex-1">
-            <label className="block font-medium mb-1">End Date</label>
-            <input
-              type="datetime-local"
-              name="endDate"
-              value={form.endDate}
-              min={form.startDate || undefined}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
-            />
+            <label className={lbl}>End Date</label>
+            <input type="datetime-local" value={form.endDate} min={form.startDate || undefined} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className={inp + ' [color-scheme:dark]'} />
           </div>
         </div>
-
         <div>
-          <label className="block font-medium mb-1">Assign To</label>
-          <Select
-            isMulti
-            value={form.assignedTo}
-            onChange={handleAssignedToChange}
-            options={userOptions}
-            styles={customStyles}
-            placeholder="Select users..."
-            noOptionsMessage={() => "No users found"}
-            closeMenuOnSelect={false}
-            hideSelectedOptions={false}
-            isSearchable={true}
-            isClearable={true}
-          />
+          <label className={lbl}>Assign To</label>
+          <Select isMulti value={form.assignedTo} onChange={v => setForm(f => ({ ...f, assignedTo: v || [] }))} options={userOptions} styles={darkSelect} placeholder="Select users..." closeMenuOnSelect={false} isSearchable isClearable />
         </div>
-
         <div>
-          <label className="block font-medium mb-1">Slot Gap</label>
-          <select
-            name="slotGap"
-            value={form.slotGap}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
-          >
+          <label className={lbl}>Slot Gap</label>
+          <select value={form.slotGap} onChange={e => setForm(f => ({ ...f, slotGap: e.target.value }))} className={inp + ' cursor-pointer'}>
             <option value="">Select Slot Gap</option>
-            {slotGapOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
+            {slotOpts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
-
-        <button
-          type="submit"
-          disabled={updateLoading}
-          className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 transition"
-        >
-          {updateLoading ? "Updating..." : "Update Event"}
+        <button type="submit" disabled={saving} className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black text-sm font-semibold py-2.5 rounded-md transition-colors">
+          {saving ? "Updating..." : "Update Event"}
         </button>
       </form>
     </div>

@@ -1,273 +1,151 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Axios from '../Api/Axios';
 import { UserContext } from '../Context/UserContext';
-import { FiPlus, FiTrash2, FiUserPlus, FiUser, FiShield } from 'react-icons/fi';
-import { motion } from 'framer-motion';
+import { useToast } from '../Context/ToastContext';
+import { FiTrash2, FiUserPlus, FiUser, FiX } from 'react-icons/fi';
 
 const Users = () => {
   const { user } = useContext(UserContext);
+  const { toast } = useToast();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddUser, setShowAddUser] = useState(false);
-  const [newUser, setNewUser] = useState({
-    username: '',
-    email: '',
-    password: '',
-    role: 'viewer'
-  });
-  const [error, setError] = useState('');
+  const [newUser, setNewUser] = useState({ username: '', email: '', password: '', role: 'viewer' });
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  useEffect(() => { fetchUsers(); }, []);
 
   const fetchUsers = async () => {
     try {
-      const response = await Axios.get('/users');
-      setUsers(response.data);
-      setLoading(false);
-    } catch (err) {
-      console.error('Error fetching users:', err);
-      setError('Failed to load users');
-      setLoading(false);
-    }
+      const r = await Axios.get('/users');
+      setUsers(r.data);
+    } catch { toast('Failed to load users', 'error'); }
+    finally { setLoading(false); }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewUser(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleAddUser = async (e) => {
+  const handleAdd = async (e) => {
     e.preventDefault();
-    setError('');
-    
     try {
       await Axios.post('/auth/signup', newUser);
       setShowAddUser(false);
-      setNewUser({
-        username: '',
-        email: '',
-        password: '',
-        role: 'viewer'
-      });
+      setNewUser({ username: '', email: '', password: '', role: 'viewer' });
       fetchUsers();
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add user');
-    }
+      toast('User created', 'success');
+    } catch (err) { toast(err.response?.data?.message || 'Failed to add user', 'error'); }
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        await Axios.delete(`/users/${userId}`);
-        fetchUsers();
-      } catch (err) {
-        setError('Failed to delete user');
-      }
-    }
+  const handleDelete = async (userId) => {
+    try {
+      await Axios.delete(`/users/${userId}`);
+      fetchUsers();
+      toast('User deleted', 'success');
+    } catch { toast('Failed to delete user', 'error'); }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+  const inp = 'w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white placeholder-white/20 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500';
+  const lbl = 'block text-xs text-white/50 mb-1.5';
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-amber-500" />
+    </div>
+  );
 
   return (
-    <div className="container mx-auto lg:w-9/10 px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">User Management</h1>
+    <div className="p-6 max-w-5xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-xl font-bold text-white">User Management</h1>
+          <p className="text-white/40 text-sm mt-0.5">{users.length} users</p>
+        </div>
         {user?.role === 'admin' && (
-          <button
-            onClick={() => setShowAddUser(true)}
-            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            <FiUserPlus className="text-lg" />
-            <span>Add User</span>
+          <button onClick={() => setShowAddUser(true)}
+            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black text-sm font-semibold px-4 py-2 rounded-md transition-colors">
+            <FiUserPlus size={14} /> Add User
           </button>
         )}
       </div>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6" role="alert">
-          <span className="block sm:inline">{error}</span>
-        </div>
-      )}
-
-      {/* Add User Modal */}
       {showAddUser && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-xl shadow-xl w-full max-w-md p-6"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-800">Add New User</h2>
-              <button 
-                onClick={() => setShowAddUser(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#1a1a1a] border border-white/10 rounded-xl w-full max-w-md p-6">
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="font-semibold text-white text-sm">Add New User</h2>
+              <button onClick={() => setShowAddUser(false)} className="text-white/40 hover:text-white"><FiX size={16} /></button>
             </div>
-            
-            <form onSubmit={handleAddUser} className="space-y-4">
+            <form onSubmit={handleAdd} className="space-y-4">
+              {[['username','Username','text','yourname'],['email','Email','email','you@company.com'],['password','Password','password','••••••••']].map(([name,label,type,ph]) => (
+                <div key={name}>
+                  <label className={lbl}>{label}</label>
+                  <input type={type} placeholder={ph} value={newUser[name]} onChange={e => setNewUser(p => ({...p,[name]:e.target.value}))} className={inp} required />
+                </div>
+              ))}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                <input
-                  type="text"
-                  name="username"
-                  value={newUser.username}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={newUser.email}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={newUser.password}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                  minLength="6"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <select
-                  name="role"
-                  value={newUser.role}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                >
+                <label className={lbl}>Role</label>
+                <select value={newUser.role} onChange={e => setNewUser(p => ({...p,role:e.target.value}))}
+                  className={inp + ' cursor-pointer'}>
                   <option value="viewer">Viewer</option>
                   <option value="manager">Manager</option>
                   <option value="admin">Admin</option>
                 </select>
               </div>
-              
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowAddUser(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                >
-                  Add User
-                </button>
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setShowAddUser(false)}
+                  className="px-4 py-2 text-xs border border-white/10 rounded-md text-white/50 hover:text-white transition-colors">Cancel</button>
+                <button type="submit"
+                  className="px-4 py-2 text-xs bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded-md transition-colors">Add User</button>
               </div>
             </form>
-          </motion.div>
+          </div>
         </div>
       )}
 
-      {/* Users List */}
-      <div className="bg-white rounded-xl shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Role
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Events
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((userItem) => (
-                <tr key={userItem._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                        <FiUser className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{userItem.username}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {userItem.email}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${userItem.role === 'admin' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
-                      {userItem.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {userItem.events && userItem.events.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {userItem.events.map(event => (
-                          <span 
-                            key={event._id}
-                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 mb-1"
-                            title={`${event.title} (${new Date(event.startDate).toLocaleDateString()} - ${new Date(event.endDate).toLocaleDateString()})`}
-                          >
-                            {event.title}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="text-gray-400">No events</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    {user?.role === 'admin' && userItem._id !== user?._id && (
-                      <button
-                        onClick={() => handleDeleteUser(userItem._id)}
-                        className="text-red-600 hover:text-red-900 mr-4"
-                        title="Delete User"
-                      >
-                        <FiTrash2 className="h-5 w-5" />
-                      </button>
-                    )}
-                  </td>
-                </tr>
+      <div className="bg-[#1a1a1a] border border-white/10 rounded-lg overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-white/5 bg-white/5">
+              {['Name','Email','Role','Events',''].map(h => (
+                <th key={h} className="text-left px-4 py-3 text-[10px] font-semibold text-white/30 uppercase tracking-wider">{h}</th>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {users.map(u => (
+              <tr key={u._id} className="hover:bg-white/5 transition-colors">
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
+                      <span className="text-xs font-bold text-amber-400">{u.username?.[0]?.toUpperCase()}</span>
+                    </div>
+                    <span className="text-white/80 font-medium">{u.username}</span>
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-white/40 text-xs">{u.email}</td>
+                <td className="px-4 py-3">
+                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${u.role === 'admin' ? 'bg-amber-500/20 text-amber-400' : u.role === 'manager' ? 'bg-blue-500/20 text-blue-400' : 'bg-white/10 text-white/50'}`}>
+                    {u.role}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  {u.events?.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                      {u.events.map(ev => (
+                        <span key={ev._id} className="text-xs bg-white/5 border border-white/10 text-white/50 px-2 py-0.5 rounded">{ev.title}</span>
+                      ))}
+                    </div>
+                  ) : <span className="text-white/20 text-xs">No events</span>}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  {user?.role === 'admin' && u._id !== user?._id && (
+                    <button onClick={() => handleDelete(u._id)}
+                      className="text-white/20 hover:text-red-400 transition-colors p-1">
+                      <FiTrash2 size={14} />
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

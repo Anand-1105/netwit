@@ -144,152 +144,80 @@ const Meeting = () => {
 
     return (
         <div className="p-4 md:p-8 max-w-7xl mx-auto">
-            {/* Delete Confirmation Modal */}
             {showDeleteModal && (
-                <div className="fixed inset-0 bg-black/50  flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-                        <h3 className="text-lg font-medium text-gray-900 mb-4">Confirm Deletion</h3>
-                        <p className="text-gray-600 mb-6">Are you sure you want to delete this meeting slot? This action cannot be undone.</p>
-                        <div className="flex justify-end space-x-3">
-                            <button
-                                onClick={() => setShowDeleteModal(false)}
-                                disabled={deleteLoading}
-                                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={deleteSlot}
-                                disabled={deleteLoading}
-                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
-                            >
-                                {deleteLoading ? (
-                                    <>
-                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Deleting...
-                                    </>
-                                ) : "Delete"}
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                    <div className="bg-[#1a1a1a] border border-white/10 rounded-lg max-w-md w-full p-6">
+                        <h3 className="text-sm font-semibold text-white mb-2">Delete slot?</h3>
+                        <p className="text-white/40 text-xs mb-5">This action cannot be undone.</p>
+                        <div className="flex justify-end gap-2">
+                            <button onClick={() => setShowDeleteModal(false)} disabled={deleteLoading}
+                                className="px-4 py-2 text-xs border border-white/10 rounded-md text-white/50 hover:text-white transition-colors disabled:opacity-50">Cancel</button>
+                            <button onClick={deleteSlot} disabled={deleteLoading}
+                                className="px-4 py-2 text-xs bg-red-500 hover:bg-red-400 text-white rounded-md disabled:opacity-50 transition-colors">
+                                {deleteLoading ? "Deleting..." : "Delete"}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Rest of the component remains the same */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Meeting Schedule</h1>
-                    <p className="text-gray-600 mt-1">Manage all scheduled meetings</p>
+                    <h1 className="text-xl font-bold text-white">Meeting Schedule</h1>
+                    <p className="text-white/40 text-sm mt-0.5">Manage all scheduled meetings</p>
                 </div>
-                
-                <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-                    <div className="relative w-full md:w-64">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search attendees..."
-                            className="pl-10 w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
+                <div className="flex gap-3">
+                    <div className="relative">
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search attendees..."
+                            className="pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white placeholder-white/20 focus:outline-none focus:border-amber-500 w-56" />
                     </div>
-                    <button
-                        onClick={fetchData}
-                        disabled={loading}
-                        className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {loading ? (
-                            <>
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Loading...
-                            </>
-                        ) : (
-                            <>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                                Refresh
-                            </>
-                        )}
+                    <button onClick={fetchData} disabled={loading}
+                        className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black text-xs font-semibold px-4 py-2 rounded-md transition-colors">
+                        {loading ? "Loading..." : "Refresh"}
                     </button>
                 </div>
             </div>
 
             {filteredUsers?.length === 0 ? (
-                <div className="bg-white rounded-xl shadow-sm p-8 text-center">
-                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <h3 className="mt-2 text-lg font-medium text-gray-900">No attendees found</h3>
-                    <p className="mt-1 text-gray-500">Try adjusting your search or refresh the data</p>
+                <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-10 text-center">
+                    <p className="text-white/30 text-sm">No attendees with booked slots</p>
                 </div>
             ) : (
-                <div className="space-y-6">
-                   {filteredUsers
-    .filter(user => user.slots && Object.keys(user.slots).length > 0)
-    .map((user) => (
-        <div key={user._id} className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center space-x-4">
-                    <div className="flex-shrink-0 h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium">
-                        {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-medium text-gray-900">
-                            {user.firstName} {user.lastName}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                            {user.title} at {user.company}
-                        </p>
-                    </div>
-                </div>
-            </div>
-            
-            {/* Show only booked slots with time and company name as badges, not the full slot grid */}
-            {user.slots && Object.keys(user.slots).length > 0 && (
-                <div className="mt-2 flex items-center flex-wrap gap-2 p-2">
-                    <span className="font-medium text-xs text-gray-600">Booked Slots:</span>
-                    {Object.entries(user.slots).map(([slotTime, slotInfo]) => (
-                        <div key={slotTime} className="relative">
-                            <span className={`  bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold ${slotInfo.completed && "bg-green-100 text-green-800"}`}>
-                                {slotTime} - {slotInfo.company}
-                            </span>
-                            {!slotInfo.completed && loggedInUser?.role !== 'viewer' && (
-                                <button
-                                    onClick={() => handleDeleteClick(user._id, slotTime)}
-                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none"
-                                    style={{ width: '20px', height: '20px' }}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20"
-                                        fill="currentColor"
-                                        className="w-3 h-3 mx-auto"
-                                    >
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
-                                </button>
-                            )}
+                <div className="space-y-3">
+                    {filteredUsers.filter(user => user.slots && Object.keys(user.slots).length > 0).map(user => (
+                        <div key={user._id} className="bg-[#1a1a1a] border border-white/10 rounded-xl overflow-hidden">
+                            <div className="p-4 border-b border-white/5 flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-sm flex-shrink-0">
+                                    {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-white">{user.firstName} {user.lastName}</p>
+                                    <p className="text-xs text-white/40">{user.title} at {user.company}</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap gap-2 p-3">
+                                <span className="text-[10px] text-white/30 font-medium self-center">Booked:</span>
+                                {Object.entries(user.slots).map(([slotTime, slotInfo]) => (
+                                    <div key={slotTime} className="relative">
+                                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${slotInfo.completed ? 'bg-emerald-500/20 text-emerald-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                                            {slotTime} — {slotInfo.company}
+                                        </span>
+                                        {!slotInfo.completed && loggedInUser?.role !== 'viewer' && (
+                                            <button onClick={() => handleDeleteClick(user._id, slotTime)}
+                                                className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 hover:bg-red-400 text-white rounded-full flex items-center justify-center transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-2.5 h-2.5">
+                                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     ))}
-                </div>
-            )}
-        </div>
-    ))}
                 </div>
             )}
         </div>
